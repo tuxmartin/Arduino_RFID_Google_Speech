@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,13 +37,14 @@ public class Spustit {
 	}
 	
 	public static void main(String[] args) throws InterruptedException, IOException {
-		File lock = new File("/var/lock/LCK..ttyUSB0");
+		File lock = new File("/var/lock/LCK..ttyUSB0"); // FIXME: to je mega prasarna...
 		lock.delete();
 		
 		port232 = new RS232(rs232PortName, rs232BaudRate);
+		
+		System.out.println("Prilozte cip...............");
 				
 		class SeriovyPort implements Runnable {	
-			DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss ");
 
 			@SuppressWarnings("static-access")
 			@Override
@@ -59,17 +59,19 @@ public class Spustit {
 						e.printStackTrace();
 					}					
 					
-					String uvod = "ID+va%C5%A1%C3%AD+karty+je";
+					String userAgent = "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0";
 					
+					String uvod = "ID+va%C5%A1%C3%AD+karty+je";					
 					String cti = uvod + nacteno;
 					System.out.println("CTU: " + cti);
 					
+					System.out.println("wget -U \"" + userAgent + "\" -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -");
 					String[] cmd = {
 							"/bin/sh",
 							"-c",
-							"wget -U Mozilla -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -"
+							"wget -U \"" + userAgent + "\" -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -"
+							//"wget -U Mozilla -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -"
 							};
-					System.out.println(cmd);
 							try {
 								Process abc = Runtime.getRuntime().exec(cmd);
 							} catch (IOException e1) {
