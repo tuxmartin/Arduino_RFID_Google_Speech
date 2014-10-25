@@ -1,0 +1,3 @@
+$ java -Djava.library.path="/usr/lib/jni/" -jar mereniTeploty.jar
+
+
