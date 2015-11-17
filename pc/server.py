@@ -6,6 +6,7 @@ from subprocess import call
 
 import signal
 import sys
+import urllib
 
 def signal_handler(signal, frame): # otestovat!!!!
 	print('You pressed Ctrl+C!')
@@ -39,6 +40,9 @@ try:
 except Exception, e:
     print "error open serial port: " + str(e)
     exit()
+    
+minulyText = ""
+stejny = 0    
 
 if ser.isOpen():
 	try:
@@ -52,15 +56,22 @@ if ser.isOpen():
 			ser.flushInput() #flush input buffer, discarding all its contents
 			if ( len(nacteno) ) < 5:
 				print "Arduino poslalo neplatna data!"
-			else:
-				userAgent = "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0";
-				uvod = "ID+va%C5%A1%C3%AD+karty+je"
-				cti = uvod + nacteno
-				# "wget -U \"" + userAgent + "\" -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -"
-				prikaz = "wget -U \"" + userAgent + "\" -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -"
-				print prikaz
-				call(["/bin/sh", "-c", prikaz])
-
+			else:	
+				if stejny < 2:					
+					minulyText = nacteno
+					cti = urllib.quote_plus(nacteno)
+					userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36";
+					# "wget -U \"" + userAgent + "\" -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "\" | madplay -"
+					prikaz = "wget -q -U \"" + userAgent + "\" -O - \"http://translate.google.com/translate_tts?ie=UTF-8&tl=cs&q=" + cti + "&total=1&idx=0&client=t\" | madplay -q -"
+					print prikaz
+					call(["/bin/sh", "-c", prikaz])
+					
+				if (minulyText == nacteno):
+					stejny = stejny + 1
+				else:
+					stejny = 0
+					minulyText = ""
+					
 	except Exception, e1:
 		print "error communicating...: " + str(e1)
 
